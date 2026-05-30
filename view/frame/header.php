@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Load the one config that defines BASE_URL
 // header.php is at view/frame/, config.php is 2 levels up at root
-require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+require_once dirname(dirname(__FILE__)) . '/config.php';
 
 $self = $_SERVER['SCRIPT_NAME'];
 ?>
