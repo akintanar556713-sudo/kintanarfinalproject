@@ -3,9 +3,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Load the one config that defines BASE_URL
-// header.php is at view/frame/, config.php is 2 levels up at root
-require_once dirname(dirname(__FILE__)) . '/config.php';
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$path   = '/'; // Change to '/asinstorage/' if running in a local subfolder
+define('BASE_URL', $scheme . '://' . $host . $path);
 
 $self = $_SERVER['SCRIPT_NAME'];
 ?>

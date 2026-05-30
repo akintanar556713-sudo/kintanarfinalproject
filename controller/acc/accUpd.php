@@ -2,7 +2,10 @@
 require_once __DIR__ . '/../../model/account.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+if (!defined('BASE_URL')) {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    define('BASE_URL', $scheme . '://' . $_SERVER['HTTP_HOST'] . '/');
+}
 
 
 if (!isset($_SESSION['account_id'])) {
