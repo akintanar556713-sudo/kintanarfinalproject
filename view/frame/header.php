@@ -1,25 +1,13 @@
 <?php
-// header.php — Shared page header for Asinstorage
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// ── Base URL — derive once, use everywhere ────────────────────
-// Works on localhost AND Railway. Always ends with /
-$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$script   = $_SERVER['SCRIPT_NAME'] ?? '';
+// Load the one config that defines BASE_URL
+// header.php is at view/frame/, config.php is 2 levels up at root
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
 
-// Walk up from the current file to find the project root (where index.php lives)
-// header.php is at: <root>/view/frame/header.php  → 2 levels up
-$root_dir = dirname(dirname(dirname(__FILE__)));   // absolute filesystem root
-$doc_root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-
-// Build base URL by stripping doc_root from root_dir
-$base_path = str_replace($doc_root, '', $root_dir);
-$base_path = rtrim(str_replace('\\', '/', $base_path), '/');
-define('BASE_URL', $scheme . '://' . $host . $base_path . '/');
+$self = $_SERVER['SCRIPT_NAME'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,13 +39,13 @@ define('BASE_URL', $scheme . '://' . $host . $base_path . '/');
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link <?= str_contains($_SERVER['PHP_SELF'], 'dashboard') ? 'active' : '' ?>"
+                    <a class="nav-link <?= str_contains($self, 'dashboard') ? 'active' : '' ?>"
                        href="<?= BASE_URL ?>view/dashboard.php">
                         <i class="bi bi-boxes me-1"></i>Inventory
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?= str_contains($_SERVER['PHP_SELF'], 'profile') ? 'active' : '' ?>"
+                    <a class="nav-link <?= str_contains($self, 'profile') ? 'active' : '' ?>"
                        href="<?= BASE_URL ?>view/profile.php">
                         <i class="bi bi-person-circle me-1"></i>Profile
                     </a>
@@ -65,14 +53,14 @@ define('BASE_URL', $scheme . '://' . $host . $base_path . '/');
             </ul>
 
             <div class="d-flex align-items-center gap-3">
-                <!-- User info pill -->
                 <div class="d-none d-lg-flex align-items-center gap-2"
                      style="background:rgba(130,87,229,0.1);border:1px solid var(--border);
                             border-radius:30px;padding:0.35rem 1rem;">
                     <div style="width:28px;height:28px;border-radius:50%;
                                 background:linear-gradient(135deg,var(--violet-800),var(--violet-500));
                                 display:flex;align-items:center;justify-content:center;
-                                font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0;">
+                                font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;
+                                color:#fff;flex-shrink:0;">
                         <?= strtoupper(substr($_SESSION['first_name'], 0, 1) . substr($_SESSION['last_name'], 0, 1)) ?>
                     </div>
                     <div>
@@ -84,9 +72,7 @@ define('BASE_URL', $scheme . '://' . $host . $base_path . '/');
                         </div>
                     </div>
                 </div>
-
-                <a href="<?= BASE_URL ?>controller/acc/logout.php"
-                   class="btn btn-outline-secondary btn-sm">
+                <a href="<?= BASE_URL ?>controller/acc/logout.php" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                 </a>
             </div>

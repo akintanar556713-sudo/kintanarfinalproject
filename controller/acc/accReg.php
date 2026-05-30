@@ -2,16 +2,11 @@
 require_once __DIR__ . '/../../model/account.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
 
-$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$root_dir  = dirname(dirname(dirname(__FILE__)));
-$doc_root  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-$base_path = rtrim(str_replace(['\\', $doc_root], ['/', ''], $root_dir), '/');
-$base      = $scheme . '://' . $host . $base_path . '/';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . $base . 'view/register.php'); exit;
+    header('Location: ' . BASE_URL . 'view/register.php'); exit;
 }
 
 $fields = ['first_name', 'last_name', 'contact', 'email', 'hire_date'];
@@ -32,14 +27,14 @@ if (!empty($data['hire_date']) && !strtotime($data['hire_date'])) $errors[] = 'H
 if (!empty($errors)) {
     $_SESSION['flash_error'] = implode(' ', $errors);
     $_SESSION['flash_old']   = $data;
-    header('Location: ' . $base . 'view/register.php'); exit;
+    header('Location: ' . BASE_URL . 'view/register.php'); exit;
 }
 
 $account = new Account();
 if ($account->emailExists($data['email'])) {
     $_SESSION['flash_error'] = 'That email address is already registered.';
     $_SESSION['flash_old']   = $data;
-    header('Location: ' . $base . 'view/register.php'); exit;
+    header('Location: ' . BASE_URL . 'view/register.php'); exit;
 }
 
 $account->first_name = $data['first_name'];
@@ -51,10 +46,10 @@ $account->password   = $password;
 
 if ($account->create()) {
     $_SESSION['flash_success'] = 'Account created successfully. You can now sign in.';
-    header('Location: ' . $base . 'index.php');
+    header('Location: ' . BASE_URL . 'index.php');
 } else {
     $_SESSION['flash_error'] = 'Registration failed. Please try again.';
     $_SESSION['flash_old']   = $data;
-    header('Location: ' . $base . 'view/register.php');
+    header('Location: ' . BASE_URL . 'view/register.php');
 }
 exit;

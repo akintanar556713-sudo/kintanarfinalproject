@@ -2,19 +2,14 @@
 require_once __DIR__ . '/../../model/product.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
 
-$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$root_dir  = dirname(dirname(dirname(__FILE__)));
-$doc_root  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-$base_path = rtrim(str_replace(['\\', $doc_root], ['/', ''], $root_dir), '/');
-$base      = $scheme . '://' . $host . $base_path . '/';
 
 if (!isset($_SESSION['account_id'])) {
-    header('Location: ' . $base . 'index.php'); exit;
+    header('Location: ' . BASE_URL . 'index.php'); exit;
 }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . $base . 'view/dashboard.php'); exit;
+    header('Location: ' . BASE_URL . 'view/dashboard.php'); exit;
 }
 
 $account_id = (int)$_SESSION['account_id'];
@@ -43,8 +38,8 @@ if (!empty($errors)) {
     $_SESSION['flash_error'] = implode(' ', $errors);
     $_SESSION['flash_old']   = compact('sku','product_name','category','description','supplier','quantity','unit_price','status');
     $redirect = ($product_id !== null)
-        ? $base . 'view/add_upd.php?id=' . $product_id
-        : $base . 'view/add_upd.php';
+        ? BASE_URL . 'view/add_upd.php?id=' . $product_id
+        : BASE_URL . 'view/add_upd.php';
     header('Location: ' . $redirect); exit;
 }
 
@@ -73,5 +68,5 @@ if ($is_update) {
 }
 
 $_SESSION[$success ? 'flash_success' : 'flash_error'] = $success ? $msg_ok : $msg_err;
-header('Location: ' . $base . 'view/dashboard.php');
+header('Location: ' . BASE_URL . 'view/dashboard.php');
 exit;

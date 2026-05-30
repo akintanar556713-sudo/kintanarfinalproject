@@ -2,19 +2,14 @@
 require_once __DIR__ . '/../../model/account.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
 
-$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$root_dir  = dirname(dirname(dirname(__FILE__)));
-$doc_root  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-$base_path = rtrim(str_replace(['\\', $doc_root], ['/', ''], $root_dir), '/');
-$base      = $scheme . '://' . $host . $base_path . '/';
 
 if (!isset($_SESSION['account_id'])) {
-    header('Location: ' . $base . 'index.php'); exit;
+    header('Location: ' . BASE_URL . 'index.php'); exit;
 }
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . $base . 'view/profile.php'); exit;
+    header('Location: ' . BASE_URL . 'view/profile.php'); exit;
 }
 
 $account_id = (int)$_SESSION['account_id'];
@@ -31,10 +26,10 @@ if ($action === 'delete') {
                 $params['path'], $params['domain'], $params['secure'], $params['httponly']);
         }
         session_destroy();
-        header('Location: ' . $base . 'index.php?deleted=1');
+        header('Location: ' . BASE_URL . 'index.php?deleted=1');
     } else {
         $_SESSION['flash_error'] = 'Failed to delete account. Please try again.';
-        header('Location: ' . $base . 'view/profile.php');
+        header('Location: ' . BASE_URL . 'view/profile.php');
     }
     exit;
 }
@@ -62,7 +57,7 @@ if (!empty($new_password)) {
 
 if (!empty($errors)) {
     $_SESSION['flash_error'] = implode(' ', $errors);
-    header('Location: ' . $base . 'view/profile.php'); exit;
+    header('Location: ' . BASE_URL . 'view/profile.php'); exit;
 }
 
 $account->account_id = $account_id;
@@ -82,5 +77,5 @@ if ($account->update($change_password)) {
     $_SESSION['flash_error'] = 'Failed to update profile. Please try again.';
 }
 
-header('Location: ' . $base . 'view/profile.php');
+header('Location: ' . BASE_URL . 'view/profile.php');
 exit;

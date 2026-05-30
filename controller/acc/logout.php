@@ -1,12 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
 
-$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$root_dir  = dirname(dirname(dirname(__FILE__)));
-$doc_root  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
-$base_path = rtrim(str_replace(['\\', $doc_root], ['/', ''], $root_dir), '/');
-$base      = $scheme . '://' . $host . $base_path . '/';
 
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
@@ -16,5 +11,5 @@ if (ini_get('session.use_cookies')) {
 }
 session_destroy();
 
-header('Location: ' . $base . 'index.php');
+header('Location: ' . BASE_URL . 'index.php');
 exit;
