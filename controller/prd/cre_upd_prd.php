@@ -1,23 +1,25 @@
 <?php
-
 require_once __DIR__ . '/../../model/product.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (!isset($_SESSION['account_id'])) {
-    header('Location: ../../index.php');
-    exit;
-}
+$scheme    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host      = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$root_dir  = dirname(dirname(dirname(__FILE__)));
+$doc_root  = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+$base_path = rtrim(str_replace(['\\', $doc_root], ['/', ''], $root_dir), '/');
+$base      = $scheme . '://' . $host . $base_path . '/';
 
+if (!isset($_SESSION['account_id'])) {
+    header('Location: ' . $base . 'index.php'); exit;
+}
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../../view/dashboard.php');
-    exit;
+    header('Location: ' . $base . 'view/dashboard.php'); exit;
 }
 
 $account_id = (int)$_SESSION['account_id'];
-
-$product_id   = isset($_POST['product_id']) && $_POST['product_id'] !== ''
-                ? (int)$_POST['product_id'] : null;
+$product_id = isset($_POST['product_id']) && $_POST['product_id'] !== ''
+              ? (int)$_POST['product_id'] : null;
 
 $sku          = trim($_POST['sku']          ?? '');
 $product_name = trim($_POST['product_name'] ?? '');
@@ -32,22 +34,18 @@ $errors = [];
 if (empty($sku))          $errors[] = 'SKU is required.';
 if (empty($product_name)) $errors[] = 'Product name is required.';
 if (empty($category))     $errors[] = 'Category is required.';
-if ($quantity === '' || !is_numeric($quantity) || (int)$quantity < 0)
-    $errors[] = 'Quantity must be a non-negative number.';
-if ($unit_price === '' || !is_numeric($unit_price) || (float)$unit_price < 0)
-    $errors[] = 'Unit price must be a non-negative number.';
+if ($quantity === '' || !is_numeric($quantity) || (int)$quantity < 0) $errors[] = 'Quantity must be a non-negative number.';
+if ($unit_price === '' || !is_numeric($unit_price) || (float)$unit_price < 0) $errors[] = 'Unit price must be a non-negative number.';
 
-$allowed = ['active', 'inactive', 'low_stock'];
-if (!in_array($status, $allowed, true)) $status = 'active';
+if (!in_array($status, ['active','inactive','low_stock'], true)) $status = 'active';
 
 if (!empty($errors)) {
     $_SESSION['flash_error'] = implode(' ', $errors);
-    $_SESSION['flash_old'] = compact('sku','product_name','category','description','supplier','quantity','unit_price','status');
+    $_SESSION['flash_old']   = compact('sku','product_name','category','description','supplier','quantity','unit_price','status');
     $redirect = ($product_id !== null)
-        ? "../../view/add_upd.php?id={$product_id}"
-        : "../../view/add_upd.php";
-    header("Location: {$redirect}");
-    exit;
+        ? $base . 'view/add_upd.php?id=' . $product_id
+        : $base . 'view/add_upd.php';
+    header('Location: ' . $redirect); exit;
 }
 
 $prd       = new Product();
@@ -75,5 +73,5 @@ if ($is_update) {
 }
 
 $_SESSION[$success ? 'flash_success' : 'flash_error'] = $success ? $msg_ok : $msg_err;
-header('Location: ../../view/dashboard.php');
+header('Location: ' . $base . 'view/dashboard.php');
 exit;

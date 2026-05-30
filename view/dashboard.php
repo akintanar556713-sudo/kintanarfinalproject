@@ -2,27 +2,19 @@
 require_once __DIR__ . '/frame/header.php';
 
 if (!isset($_SESSION['account_id'])) {
-    header('Location: ../index.php');
+    header('Location: ' . BASE_URL . 'index.php');
     exit;
 }
 
 require_once __DIR__ . '/../controller/prd/read.php';
 
-$flash_success = '';
-$flash_error   = '';
-if (!empty($_SESSION['flash_success'])) {
-    $flash_success = $_SESSION['flash_success'];
-    unset($_SESSION['flash_success']);
-}
-if (!empty($_SESSION['flash_error'])) {
-    $flash_error = $_SESSION['flash_error'];
-    unset($_SESSION['flash_error']);
-}
+$flash_success = $flash_error = '';
+if (!empty($_SESSION['flash_success'])) { $flash_success = $_SESSION['flash_success']; unset($_SESSION['flash_success']); }
+if (!empty($_SESSION['flash_error']))   { $flash_error   = $_SESSION['flash_error'];   unset($_SESSION['flash_error']); }
 
 $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
 ?>
 
-<!-- ── Page Header ──────────────────────────────────────────── -->
 <div class="d-flex align-items-start justify-content-between mb-4 flex-wrap gap-3">
     <div>
         <h4 class="page-title mb-1">
@@ -32,12 +24,11 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
             Welcome back, <strong style="color:var(--violet-300);"><?= htmlspecialchars($_SESSION['first_name']) ?></strong>
         </p>
     </div>
-    <a href="add_upd.php" class="btn btn-brand">
+    <a href="<?= BASE_URL ?>view/add_upd.php" class="btn btn-brand">
         <i class="bi bi-plus-lg me-1"></i>Add Product
     </a>
 </div>
 
-<!-- ── Flash Alerts ─────────────────────────────────────────── -->
 <?php if ($flash_success): ?>
     <div class="alert alert-success alert-dismissible fade show py-2 small mb-4" role="alert">
         <i class="bi bi-check-circle me-1"></i><?= htmlspecialchars($flash_success) ?>
@@ -51,7 +42,7 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
     </div>
 <?php endif; ?>
 
-<!-- ── Stats Row ─────────────────────────────────────────────── -->
+<!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
         <div class="stat-card">
@@ -83,9 +74,9 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
     </div>
 </div>
 
-<!-- ── Filter Bar ────────────────────────────────────────────── -->
+<!-- Filter Bar -->
 <div class="filter-bar mb-4">
-    <form method="GET" action="dashboard.php" class="row g-2 align-items-end">
+    <form method="GET" action="<?= BASE_URL ?>view/dashboard.php" class="row g-2 align-items-end">
         <div class="col-12 col-md-4">
             <label class="form-label">Search</label>
             <div class="input-group input-group-sm">
@@ -120,14 +111,14 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
             <button type="submit" class="btn btn-brand btn-sm px-3">
                 <i class="bi bi-funnel me-1"></i>Filter
             </button>
-            <a href="dashboard.php" class="btn btn-outline-secondary btn-sm px-3">
+            <a href="<?= BASE_URL ?>view/dashboard.php" class="btn btn-outline-secondary btn-sm px-3">
                 <i class="bi bi-x-lg me-1"></i>Clear
             </a>
         </div>
     </form>
 </div>
 
-<!-- ── Product Table ─────────────────────────────────────────── -->
+<!-- Product Table -->
 <div class="card">
     <div class="card-header-custom d-flex align-items-center justify-content-between">
         <span><i class="bi bi-table me-2"></i>Products</span>
@@ -142,9 +133,9 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
                 <i class="bi bi-inbox display-4 d-block mb-3"></i>
                 <div class="mb-1">No products found.</div>
                 <?php if (array_filter($filters)): ?>
-                    <a href="dashboard.php" class="small">Clear filters</a>
+                    <a href="<?= BASE_URL ?>view/dashboard.php" class="small">Clear filters</a>
                 <?php else: ?>
-                    <a href="add_upd.php" class="btn btn-brand btn-sm mt-2">
+                    <a href="<?= BASE_URL ?>view/add_upd.php" class="btn btn-brand btn-sm mt-2">
                         <i class="bi bi-plus-lg me-1"></i>Add your first product
                     </a>
                 <?php endif; ?>
@@ -161,21 +152,21 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
                             <th class="text-end">Unit Price</th>
                             <th>Status</th>
                             <th>Supplier</th>
-                            <th style="width:110px;">Actions</th>
+                            <th style="width:120px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php foreach ($products as $p): ?>
                         <?php
-                            $qty = (int)$p['quantity'];
+                            $qty       = (int)$p['quantity'];
                             $qty_class = $qty === 0 ? 'qty-zero' : ($p['status'] === 'low_stock' ? 'qty-low' : '');
                         ?>
                         <tr>
-                            <td class="small" style="color:var(--text-muted);font-family:'DM Mono',monospace;">
+                            <td class="small" style="color:var(--text-muted);font-family:monospace;">
                                 <?= htmlspecialchars($p['sku']) ?>
                             </td>
                             <td>
-                                <a href="prd_view.php?id=<?= (int)$p['product_id'] ?>"
+                                <a href="<?= BASE_URL ?>view/prd_view.php?id=<?= (int)$p['product_id'] ?>"
                                    style="color:var(--text-primary);font-weight:600;">
                                     <?= htmlspecialchars($p['product_name']) ?>
                                 </a>
@@ -200,17 +191,16 @@ $total_value = number_format((float)($stats['total_value'] ?? 0), 2);
                                 <?= htmlspecialchars($p['supplier'] ?: '—') ?>
                             </td>
                             <td>
-                                <!-- Vertical action buttons -->
                                 <div class="action-btns">
-                                    <a href="prd_view.php?id=<?= (int)$p['product_id'] ?>"
+                                    <a href="<?= BASE_URL ?>view/prd_view.php?id=<?= (int)$p['product_id'] ?>"
                                        class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-eye me-1"></i>View
                                     </a>
-                                    <a href="add_upd.php?id=<?= (int)$p['product_id'] ?>"
+                                    <a href="<?= BASE_URL ?>view/add_upd.php?id=<?= (int)$p['product_id'] ?>"
                                        class="btn btn-sm btn-outline-brand">
                                         <i class="bi bi-pencil me-1"></i>Edit
                                     </a>
-                                    <a href="../controller/prd/del_prd.php?id=<?= (int)$p['product_id'] ?>"
+                                    <a href="<?= BASE_URL ?>controller/prd/del_prd.php?id=<?= (int)$p['product_id'] ?>"
                                        class="btn btn-sm btn-outline-danger"
                                        onclick="return confirm('Delete \'<?= addslashes(htmlspecialchars($p['product_name'])) ?>\'?\nThis cannot be undone.')">
                                         <i class="bi bi-trash me-1"></i>Delete

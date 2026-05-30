@@ -5,9 +5,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Resolve correct relative path to style.css from any view depth
-$depth = substr_count($_SERVER['PHP_SELF'], '/') - 1;
-$root  = str_repeat('../', max(0, $depth - 1));
+// ── Base URL — derive once, use everywhere ────────────────────
+// Works on localhost AND Railway. Always ends with /
+$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$script   = $_SERVER['SCRIPT_NAME'] ?? '';
+
+// Walk up from the current file to find the project root (where index.php lives)
+// header.php is at: <root>/view/frame/header.php  → 2 levels up
+$root_dir = dirname(dirname(dirname(__FILE__)));   // absolute filesystem root
+$doc_root = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+
+// Build base URL by stripping doc_root from root_dir
+$base_path = str_replace($doc_root, '', $root_dir);
+$base_path = rtrim(str_replace('\\', '/', $base_path), '/');
+define('BASE_URL', $scheme . '://' . $host . $base_path . '/');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +29,7 @@ $root  = str_repeat('../', max(0, $depth - 1));
     <title>Asinstorage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $root ?>view/style.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>style.css">
 </head>
 <body>
 
@@ -25,7 +37,7 @@ $root  = str_repeat('../', max(0, $depth - 1));
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid px-4">
 
-        <a class="navbar-brand" href="<?= $root ?>view/dashboard.php">
+        <a class="navbar-brand" href="<?= BASE_URL ?>view/dashboard.php">
             Asin<span class="accent">storage</span>
         </a>
 
@@ -40,13 +52,13 @@ $root  = str_repeat('../', max(0, $depth - 1));
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link <?= str_contains($_SERVER['PHP_SELF'], 'dashboard') ? 'active' : '' ?>"
-                       href="<?= $root ?>view/dashboard.php">
+                       href="<?= BASE_URL ?>view/dashboard.php">
                         <i class="bi bi-boxes me-1"></i>Inventory
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= str_contains($_SERVER['PHP_SELF'], 'profile') ? 'active' : '' ?>"
-                       href="<?= $root ?>view/profile.php">
+                       href="<?= BASE_URL ?>view/profile.php">
                         <i class="bi bi-person-circle me-1"></i>Profile
                     </a>
                 </li>
@@ -73,7 +85,8 @@ $root  = str_repeat('../', max(0, $depth - 1));
                     </div>
                 </div>
 
-                <a href="<?= $root ?>controller/acc/logout.php" class="btn btn-outline-secondary btn-sm">
+                <a href="<?= BASE_URL ?>controller/acc/logout.php"
+                   class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-box-arrow-right me-1"></i>Logout
                 </a>
             </div>
